@@ -6,8 +6,8 @@ import sqlalchemy
 
 def collect_trades(df):
     #collecting trade details from IMX for Gods Unchained cards:   
-    maxtime = '2022-10-30T00:10:00Z'
-    mintime = '2022-10-29T23:00:00Z'
+    maxtime = '2022-10-30T01:10:00Z'
+    mintime = '2022-10-30T00:50:00Z'
     params = {
         'max_timestamp': maxtime,
         'min_timestamp': mintime,
@@ -34,12 +34,23 @@ def collect_trades(df):
         for asset in response['result']:            
             transaction_id = asset['transaction_id']
             asset_id = asset['b']['token_id']
+            #currency in which assets are sold
             currency = asset['a']['token_type']
-            sell_value = asset['a']['sold']
-            if asset['b']['token_address'] == '0x07865c6e87b9f70255377e024ace6630c1eaa37f':
-                sell_value = int(sell_value) / 10e6
+            if currency == 'ETH':
+                currency = 'ETH'
+            elif currency == 'ERC20' and asset['a']['token_address'] == '0xccc8cb5229b0ac8069c51fd58367fd1e622afd97':
+                currency = 'GODS'
+            elif currency == 'ERC20' and asset['a']['token_address'] == '0xf57e7e7c23978c3caec3c3548e3d615c346e79ff':
+                currency = 'IMX'
+            #elif currency == 'ERC20' and asset['a']['token_address'] == '0x07865c6e87b9f70255377e024ace6630c1eaa37f':
+            #    currency = 'USDC'
             else:
-                sell_value = int(sell_value) / 10e17
+                currency = 'USDC'
+            sell_value = asset['a']['sold']
+            if currency == 'USDC':
+                sell_value = int(sell_value) / 1e6
+            else:
+                sell_value = int(sell_value) / 1e18
             timestamp = asset['timestamp']
             #timestamp = str(timestamp).split('T')[0] 
             
@@ -66,7 +77,7 @@ df = collect_trades(df)
 df
 
 #send data to mysql:
-engine = sqlalchemy.create_engine('mysql+pymysql://root:password@localhost:3306/gu_trades')
+engine = sqlalchemy.create_engine('mysql+pymysql://root:Joao852654@localhost:3306/gu_trades')
 
 df.to_sql(
     name = 'trades',
