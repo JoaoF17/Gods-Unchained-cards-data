@@ -6,8 +6,8 @@ import sqlalchemy
 
 def collect_trades(df):
     #collecting trade details from IMX for Gods Unchained cards:   
-    maxtime = '2022-10-30T01:10:00Z'
-    mintime = '2022-10-30T00:50:00Z'
+    maxtime = '2022-10-30T02:10:00Z'
+    mintime = '2022-10-30T00:00:00Z'
     params = {
         'max_timestamp': maxtime,
         'min_timestamp': mintime,
@@ -77,7 +77,7 @@ df = collect_trades(df)
 df
 
 #send data to mysql:
-engine = sqlalchemy.create_engine('mysql+pymysql://root:Joao852654@localhost:3306/gu_trades')
+engine = sqlalchemy.create_engine('mysql+pymysql://root:password@localhost:3306/gu_trades')
 
 df.to_sql(
     name = 'trades',
